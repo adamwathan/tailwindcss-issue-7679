@@ -1,0 +1,47 @@
+name: build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+
+  test_tailwindcss:
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+        node: [17.6.0]
+    runs-on: ${{ matrix.os }}
+    name: Test tailwindcss ${{ matrix.os }}, node ${{ matrix.node }}
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+          with:
+            node-version: ${{ matrix.node }}
+
+      - name: Setup
+        run: |
+          npm install
+          npx pm2 start ecosystem.config.js
+          npx pm2 ls
+          grep 'btn-cool' dist/output.css
+
+      - name: Test 1
+        run: |
+          cp templates/tailwind.css.1 src/tailwind.css
+          sleep 2
+          grep 'btn-cool' dist/output.css
+          cp templates/index.html.1 src/index.html
+          sleep 2
+          grep 'btn-cool' dist/output.css
+
+      - name: Test 2
+        run: |
+          cp templates/tailwind.css.2 src/tailwind.css
+          sleep 2
+          grep 'btn-cool' dist/output.css
+          cp templates/index.html.2 src/index.html
+          sleep 2
+          grep 'btn-cool' dist/output.css
+
